@@ -68,7 +68,7 @@ push:
 
 
 
-.deploy:
+deploy:
   stage: deploy 
   rules:
     - if: '$CI_COMMIT_BRANCH == "master"'
