@@ -1,5 +1,7 @@
 # Use an official Python runtime as a base image
 FROM python:3.11-slim-bullseye
+
+# Set working directory
 WORKDIR /Exchange
 
 # Set environment variables
@@ -17,17 +19,23 @@ RUN apt-get update && apt-get install -y \
 # Upgrade pip
 RUN pip install --upgrade pip
 
-# Copy the Django project and install dependencies
-COPY requirements.txt /Exchange/
+# Copy requirements first (for better caching)
+COPY requirements.txt .
 
-# run this command to install all dependencies
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the Django project to the container
-COPY . /Exchange
+# Copy ALL project files (including manage.py)
+COPY . .
+
+# Make entrypoint script executable
+RUN chmod 777 entrypoint.sh
+
+# Use entrypoint script
+ENTRYPOINT ["./entrypoint.sh"]
 
 # Expose the Django port
 EXPOSE 8000
 
 # Run Django’s development server
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["python", "Exchange/manage.py", "runserver", "0.0.0.0:8000"]

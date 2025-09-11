@@ -18,7 +18,7 @@ spec:
       containers:
       - name: bitpin-container 
       
-        image: nexus/bitpin:latest
+        image: repo.sepahtan.net:8082/crypto_peyman:6303b956acf0c462854fec06e76c644bf68902b0
 
         imagePullPolicy: Always
         ports:
