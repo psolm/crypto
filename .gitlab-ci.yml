@@ -6,7 +6,7 @@ stages:
 print-vars:
   stage: print-vars
   rules:
-    - if: '$CI_COMMIT_BRANCH == "dev"'
+    - if: '$CI_COMMIT_BRANCH == "master"'
   script:
     - echo "Printing all environment variables:"
     - printenv  # Prints all environment variables for debugging.
@@ -25,7 +25,7 @@ build:
       - .docker
     policy: pull-push
   rules:
-    - if: '$CI_COMMIT_BRANCH == "dev"'
+    - if: '$CI_COMMIT_BRANCH == "master"'
   script:
     - |
       # Extract the repository name dynamically
