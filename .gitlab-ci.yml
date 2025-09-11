@@ -56,8 +56,8 @@ push:
       IMAGE_NAME="$NEXUS_HOST/$REPO_NAME"
       IMAGE_TAG="$IMAGE_NAME:$CI_COMMIT_BEFORE_SHA"
 
-      echo "Logging into Nexus Repo ...."
-      echo "$NEXUS_PASSWORD" | docker login -u "$NEXUS_USERNAME" --password-stdin $NEXUS_HOST
+      #echo "Logging into Nexus Repo ...."
+      #echo "$NEXUS_PASSWORD" | docker login -u "$NEXUS_USERNAME" --password-stdin $NEXUS_HOST
 
       echo "Pushing Docker image..."
       docker push "$IMAGE_TAG"
