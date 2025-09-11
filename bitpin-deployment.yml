@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: bitpin-deployment
-  namespace: ingress
+  namespace: default
   labels:
     app: bitpin          
 spec:

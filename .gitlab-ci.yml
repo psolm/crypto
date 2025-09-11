@@ -83,11 +83,9 @@ deploy:
       
       echo "Deploying to Kubernetes with image: $IMAGE_TAG"
       
+      helm upgrade --install bitpin-app ./bitpin-app
       # Update the deployment YAML file with the correct image from Nexus repository...
-      sed -i "s|image: nexus/bitpin:latest|image: $NEXUS_HOST/$REPO_NAME:$CI_COMMIT_BEFORE_SHA|g" bitpin-deployment.yml
+      #      sed -i "s|image: nexus/bitpin:latest|image: $NEXUS_HOST/$REPO_NAME:$CI_COMMIT_BEFORE_SHA|g" bitpin-deployment.yml
       
-      # Apply the deployment and service
-      kubectl apply -f bitpin-deployment.yml 
-      kubectl apply -f bitpin-service.yml 
       
       echo "Deployment and service applied successfully....!"
