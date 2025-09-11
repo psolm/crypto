@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bitpin-deployment
+  namespace: ingress
+  labels:
+    app: bitpin          
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bitpin
+  template:
+    metadata:
+      labels:
+        app: bitpin 
+    spec:
+      containers:
+      - name: bitpin-container 
+      
+        image: nexus/bitpin:latest
+
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080 
+          protocol: TCP
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Dev"
+      
+        resources:
+          requests:
+            cpu: "1000m"    # 0.1 CPU core
+            memory: "1Gi" # 128 مگابایت RAM
+          limits:
+            cpu: "2000m"    # 0.5 CPU core
+            memory: "2Gi" # 512 مگابایت RAM
+
+
