@@ -1,0 +1,12 @@
+dotenv
+Django
+djangorestframework
+django_extensions
+setuptools
+psycopg2
+psycopg2-binary
+pillow
+eth_account
+bitcoin
+plotly
+python-baseconv

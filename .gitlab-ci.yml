@@ -1,0 +1,95 @@
+stages:
+  - print-vars
+  - build
+  - push
+  - deploy
+print-vars:
+  stage: print-vars
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+  script:
+    - echo "Printing all environment variables:"
+    - printenv  # Prints all environment variables for debugging.
+
+variables:
+  NEXUS_HOST: "repo.sepahtan.net:8082"
+  NEXUS_REPO: "sepahtan-docker"
+  GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
+
+      
+build:
+  stage: build
+  cache:
+    key: "docker"
+    paths:
+      - .docker
+    policy: pull-push
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+  script:
+    - |
+      # Extract the repository name dynamically
+      REPO_NAME=$(basename "$CI_REPOSITORY_URL" .git)
+      IMAGE_NAME="$NEXUS_HOST/$REPO_NAME"
+      IMAGE_VAR="$CI_COMMIT_REF_NAME"_"$CI_COMMIT_BEFORE_SHA"
+      IMAGE_TAG="$IMAGE_NAME:$CI_COMMIT_BEFORE_SHA"
+
+      # Debugging output
+      echo "Repository Name: $REPO_NAME"
+      echo "Image Name: $IMAGE_NAME"
+      echo "Image Tag: $IMAGE_TAG"
+
+      # Build the Docker image
+      echo "Building Docker image..."
+      docker build -t "$IMAGE_TAG"  .
+      #      docker build -t "$IMAGE_TAG" .
+      echo "Build complete!"
+
+push:
+  stage: push
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+
+  script:
+    - |
+      REPO_NAME=$(basename "$CI_REPOSITORY_URL" .git)
+      IMAGE_NAME="$NEXUS_HOST/$REPO_NAME"
+      IMAGE_TAG="$IMAGE_NAME:$CI_COMMIT_BEFORE_SHA"
+
+      echo "Logging into Nexus Repo ...."
+      echo "$NEXUS_PASSWORD" | docker login -u "$NEXUS_USERNAME" --password-stdin $NEXUS_HOST
+
+      echo "Pushing Docker image..."
+      docker push "$IMAGE_TAG"
+      echo "Image pushed successfully!"
+      docker rmi "$IMAGE_TAG"
+      echo "Image Deleted successfully!"
+
+
+
+
+.deploy:
+  stage: deploy 
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "dev"'
+
+  script:
+    - |
+      # Get the image tag variables again
+      REPO_NAME=$(basename "$CI_REPOSITORY_URL" .git)
+      IMAGE_NAME="$NEXUS_HOST/$REPO_NAME"
+      IMAGE_TAG="$IMAGE_NAME:$CI_COMMIT_BEFORE_SHA"
+      
+      echo "Logging into Nexus Repo ...."
+      echo "$NEXUS_PASSWORD" | docker login -u "$NEXUS_USERNAME" --password-stdin $NEXUS_HOST
+      
+      echo "Deploying to Kubernetes with image: $IMAGE_TAG"
+      
+      # Update the deployment YAML file with the correct image from Nexus repository...
+      sed -i "s|image: nexus/usermanagement:latest|image: $NEXUS_HOST/$REPO_NAME:$CI_COMMIT_BEFORE_SHA|g" usermanagement-deployment.yml
+      
+      # Apply the deployment and service
+      kubectl apply -f usermanagement-deployment.yml 
+      kubectl apply -f usermanagement-service.yml 
+      
+      echo "Deployment and service applied successfully....!"
